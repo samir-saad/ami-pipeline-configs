@@ -64,7 +64,7 @@ objects:
   labels:
     app: ${APP_NAME}
   metadata:
-    name: ami-spring-config-server
+    name: ${OCP_OBJECT_NAME}
   spec:
     ports:
     - name: http
