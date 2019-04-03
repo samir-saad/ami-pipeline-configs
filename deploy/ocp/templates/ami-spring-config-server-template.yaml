@@ -1,0 +1,218 @@
+apiVersion: v1
+kind: Template
+labels:
+  template: ami-spring-config-server-template
+metadata:
+  annotations:
+    description: ami-spring-config-server-template
+  name: ami-spring-config-server-template
+objects:
+- apiVersion: v1
+  kind: ConfigMap
+  labels:
+    app: ${APP_NAME}
+  metadata:
+    name: ${OCP_OBJECT_NAME}
+  data:
+    application.properties: |-
+      ## =========================================================
+      ##              Service
+      ## =========================================================
+      application.domain=${APP_DOMAIN}
+      application.lob=${APP_LOB}
+      spring.application.name=${APP_NAME}
+      spring.profiles.active=${APP_PROFILE}
+      
+      
+      ## =========================================================
+      ##              Server
+      ## =========================================================
+      server.address=0.0.0.0
+      server.port=8080
+      server.servlet.application-display-name=${spring.application.name}
+      server.servlet.path=/
+      server.servlet.context-path=/
+      
+      ## Tomcat-specific server settings.
+      server.tomcat.accept-count=20
+      server.tomcat.max-connections=20
+      server.tomcat.max-threads=10
+      
+      
+      ## =========================================================
+      ##              Management / Actuator
+      ## =========================================================
+      management.server.address=0.0.0.0
+      management.server.port=8081
+      management.endpoints.web.base-path=/actuator
+      management.endpoints.web.exposure.include=info,health,metrics,prometheus
+      
+      
+      ## =========================================================
+      ##              Config Repo
+      ## =========================================================
+      spring.cloud.config.server.git.uri=${GIT_URI}
+      spring.cloud.config.server.git.username=${SPRING_CLOUD_CONFIG_SERVER_GIT_USERNAME}
+      spring.cloud.config.server.git.password=${SPRING_CLOUD_CONFIG_SERVER_GIT_PASSWORD}
+      spring.cloud.config.server.git.searchPaths=*
+      
+      ## Disable config health check
+      health.config.enabled=false
+    
+- apiVersion: v1
+  kind: Service
+  labels:
+    app: ${APP_NAME}
+  metadata:
+    name: ami-spring-config-server
+  spec:
+    ports:
+    - name: http
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    - name: mgmt
+      port: 8081
+      protocol: TCP
+      targetPort: 8081
+    selector:
+      name: ${OCP_OBJECT_NAME}
+    sessionAffinity: None
+    type: ClusterIP
+    
+- apiVersion: v1
+  kind: DeploymentConfig
+  labels:
+    app: ${APP_NAME}
+  metadata:
+    name: ${OCP_OBJECT_NAME}
+  spec:
+    replicas: ${{REPLICAS}}
+    selector:
+      name: ${OCP_OBJECT_NAME}
+    strategy:
+      type: Rolling
+    template:
+      metadata:
+        labels:
+          name: ${OCP_OBJECT_NAME}
+      spec:
+        containers:
+        - env:
+           - name: JAVA_OPTIONS
+             value: "${JAVA_OPTIONS}"
+           - name: NAMESPACE
+             value: "${NAMESPACE}"
+           - name: SPRING_CLOUD_CONFIG_SERVER_GIT_USERNAME
+             value: "${GIT_USERNAME}"
+           - name: SPRING_CLOUD_CONFIG_SERVER_GIT_PASSWORD
+             value: "${GIT_PASSWORD}"
+          capabilities: {}
+          name: ${OCP_OBJECT_NAME}
+          image: ${IMAGE_NAME}:${IMAGE_TAG}
+          imagePullPolicy: IfNotPresent
+          ports:
+          - containerPort: 8080
+            name: "http"
+            protocol: "TCP"
+          - containerPort: 8081
+            name: "mgmt"
+            protocol: "TCP"
+          livenessProbe:
+            httpGet:
+              path: "/actuator/health"
+              port: 8081
+            initialDelaySeconds: 180
+          readinessProbe:
+            httpGet:
+              path: "/actuator/health"
+              port: 8081
+            initialDelaySeconds: 10
+          resources:
+            requests:
+              cpu: ${{CPU_REQUEST}}
+              memory: ${MEMORY_REQUEST}
+            limits:
+              cpu: ${{CPU_LIMIT}}
+              memory: ${MEMORY_LIMIT}
+          volumeMounts:
+          - mountPath: /deployments/config
+            name: ami-service-config
+          
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        volumes:
+        - name: ami-service-config
+          configMap:
+            name: ${OCP_OBJECT_NAME}
+
+    triggers:
+    - imageChangeParams:
+        automatic: false
+        containerNames:
+        - ${OCP_OBJECT_NAME}
+        from:
+          kind: ImageStreamTag
+          name: ${IMAGE_NAME}:${IMAGE_TAG}
+      type: ImageChange
+
+parameters:
+parameters:
+- description: The application name.
+  displayName: Application Name
+  name: APP_NAME
+  required: true
+- description: The application profile.
+  displayName: Application profile
+  name: APP_PROFILE
+  required: true
+- description: The application namespace.
+  displayName: Application namespace
+  name: NAMESPACE
+  required: true
+- description: The OpenShift DC name.
+  displayName: OpenShift DC name
+  name: OCP_OBJECT_NAME
+  required: true
+- description: replicas.
+  displayName: Replicas
+  name: REPLICAS
+  value: "1"
+- description: Minimum amount of memory to reserve for the container.
+  displayName: Memory Request
+  name: MEMORY_REQUEST
+  value: 300Mi
+- description: Maximum amount of memory the container can use.
+  displayName: Memory Limit
+  name: MEMORY_LIMIT
+  value: 1Gi
+- description: Minimum amount of CPU to reserve for the container.
+  displayName: CPU Request
+  name: CPU_REQUEST
+  value: 100m
+- description: Maximum amount of CPU the container can use.
+  displayName: CPU Limit
+  name: CPU_LIMIT
+  value: "1"
+- description: JVM Options.
+  displayName: JVM Options
+  name: JAVA_OPTIONS
+  value: "-XshowSettings:vm -Xms256m -Xmx900m"
+- description: Image name.
+  displayName: Image name
+  name: IMAGE_NAME
+  required: true
+- description: Image tag.
+  displayName: Image tag
+  name: IMAGE_TAG
+  required: true
+- name: GIT_URI
+  required: true
+- name: GIT_USERNAME
+  value: "" 
+- name: GIT_PASSWORD
+  value: "" 
+- name: APP_DOMAIN
+  required: true
+- name: APP_LOB
+  required: true

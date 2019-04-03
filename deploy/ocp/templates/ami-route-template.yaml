@@ -1,0 +1,70 @@
+apiVersion: v1
+kind: Template
+labels:
+  template: iamp-route-internal
+metadata:
+  annotations:
+    description: iamp-route-internal
+  name: iamp-route-internal
+objects:
+- apiVersion: v1
+  kind: Route
+  labels:
+    app: ${APP_NAME}
+  metadata:
+    name: ${OCP_OBJECT_NAME}
+    annotations:
+      haproxy.router.openshift.io/ip_whitelist: ${{IP_WHITELIST}}
+      haproxy.router.openshift.io/disable_cookies: 'true'
+  spec:
+    host: "${OCP_OBJECT_NAME}-${NAMESPACE}.pathfinder.bcgov"
+    port:
+      targetPort: ${PORT}
+    tls:
+      termination: ${TLS_TERMINATION}
+      insecureEdgeTerminationPolicy: ${INSECURE_EDGE_TERMINATION_POLICY}
+    to:
+      kind: Service
+      name: ${SERVICE_NAME}
+      weight: ${{WEIGHT}}
+    path: ${PATH}
+      
+parameters:
+- description: The application name.
+  displayName: Application Name
+  name: APP_NAME
+  required: true
+- description: The application namespace.
+  displayName: Application namespace
+  name: NAMESPACE
+  required: true
+- description: The OpenShift Route name.
+  displayName: OpenShift Route name
+  name: OCP_OBJECT_NAME
+  required: true
+- description: The OpenShift Service name.
+  displayName: OpenShift Service name
+  name: SERVICE_NAME
+  required: true
+- description: The OpenShift Service weight.
+  displayName: OpenShift Service weight
+  name: WEIGHT
+  value: "100"
+- description: The application port.
+  displayName: Application port
+  name: PORT
+  required: true
+- description: The application path.
+  displayName: Application Path
+  name: PATH
+- description: The TLS termination.
+  displayName: TLS Termination
+  name: TLS_TERMINATION
+  value: edge
+- description: Insecure edge termination policy.
+  displayName: Insecure Edge Termination Policy
+  name: INSECURE_EDGE_TERMINATION_POLICY
+  value: Redirect
+- description: The route whitelist.
+  displayName: route whitelist
+  name: IP_WHITELIST
