@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suppressions xmlns="https://www.owasp.org/index.php/OWASP_Dependency_Check_Suppression">
+
+	<suppress>
+		<notes>
+			<![CDATA[
+			file name: spring-security-core-5.1.4.RELEASE.jar
+			file name: spring-security-crypto-5.1.4.RELEASE.jar
+			file name: spring-security-web-5.1.4.RELEASE.jar
+			file name: spring-boot-starter-security-2.1.3.RELEASE.jar
+			file name: spring-security-oauth2-autoconfigure-2.1.0.M4.jar
+			]]>
+		</notes>
+		<gav regex="true">^org\.springframework\..*$</gav>
+		<cve>CVE-2018-1258</cve>
+	</suppress>
+
+	<suppress>
+		<notes>
+			<![CDATA[
+			file name: spring-boot-starter-integration-2.1.3.RELEASE.jar
+			]]>
+		</notes>
+		<gav regex="true">^org\.springframework\.boot:spring-boot-starter-integration:.*$</gav>
+		<cve>CVE-2019-3772</cve>
+	</suppress>
+
+	<suppress>
+		<notes>
+			<![CDATA[
+		   file name: spring-boot-starter-web-services-2.1.3.RELEASE.jar
+		   ]]>
+		</notes>
+		<gav regex="true">^org\.springframework\.boot:spring-boot-starter-web-services:.*$</gav>
+		<cve>CVE-2019-3773</cve>
+	</suppress>
+
+</suppressions>
