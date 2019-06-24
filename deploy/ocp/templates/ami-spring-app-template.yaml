@@ -82,6 +82,14 @@ objects:
                 value: "${JAVA_OPTIONS}"
               - name: NAMESPACE
                 value: "${NAMESPACE}"
+              - name: INFO_PLATFORM_NAMESPACE
+                value: "${NAMESPACE}"
+              - name: INFO_PLATFORM_TYPE
+                value: "OpenShift"
+              - name: INFO_DEPLOYMENT_TYPE
+                value: "${DEPLOYMENT_TYPE}"
+              - name: INFO_DEPLOYMENT_TAG
+                value: "${DEPLOYMENT_TAG}"
             capabilities: {}            
             ports:
               - containerPort: 8080
@@ -152,23 +160,23 @@ parameters:
 - description: Minimum amount of memory to reserve for the container.
   displayName: Memory Request
   name: MEMORY_REQUEST
-  value: 300Mi
+  value: 256Mi
 - description: Maximum amount of memory the container can use.
   displayName: Memory Limit
   name: MEMORY_LIMIT
-  value: 1Gi
+  value: 512Mi
 - description: Minimum amount of CPU to reserve for the container.
   displayName: CPU Request
   name: CPU_REQUEST
-  value: 100m
+  value: 50m
 - description: Maximum amount of CPU the container can use.
   displayName: CPU Limit
   name: CPU_LIMIT
-  value: "1"
+  value: 500m
 - description: JVM Options.
   displayName: JVM Options
   name: JAVA_OPTIONS
-  value: "-XshowSettings:vm -Xms256m -Xmx900m"
+  value: "-XshowSettings:vm -Xms200m -Xmx450m"
 - description: Image name.
   displayName: Image name
   name: IMAGE_NAME
@@ -177,6 +185,10 @@ parameters:
   displayName: Image tag
   name: IMAGE_TAG
   required: true
+- name: DEPLOYMENT_TYPE
+  value: ""
+- name: DEPLOYMENT_TAG
+  value: ""            
 - description: Config server uri.
   displayName: Config server uri
   name: CONFIG_SERVER_URI
