@@ -63,6 +63,8 @@ parameters:
 - name: APP_VERSION
   displayName: Application version
   required: true
+- name: NAMESPACE
+  displayName: Namespace
 - name: BUILD_NAME
   displayName: Build Name
   required: true
