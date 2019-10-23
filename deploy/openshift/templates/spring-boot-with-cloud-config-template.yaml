@@ -1,11 +1,11 @@
 apiVersion: v1
 kind: Template
 labels:
-  template: iamp-spring-app-template
+  template: spring-app-template
 metadata:
   annotations:
-    description: iamp-spring-app-template
-  name: iamp-spring-app-template
+    description: spring-app-template
+  name: spring-app-template
 objects:
 - apiVersion: v1
   kind: ConfigMap
@@ -34,7 +34,68 @@ objects:
       
       ## Cache health check response for 1 hour (in milliseconds)
       #health.config.time-to-live=3600000
+      
+    logback.xml: |-
+      <?xml version="1.0" encoding="UTF-8"?>
+      <configuration scan="true">
+      
+          <!-- use Spring defaults console and file -->
+          <include resource="org/springframework/boot/logging/logback/base.xml" />
+      
+          <!-- Splunk config -->
+          <springProperty scope="context" name="splunk-url" source="splunk.hec.url"/>
+          <springProperty scope="context" name="splunk-token" source="splunk.hec.token"/>
+          <springProperty scope="context" name="application-name" source="spring.application.name"/>
+      
+          <appender name="splunk" class="com.splunk.logging.HttpEventCollectorLogbackAppender">
+              <url>${splunk-url}</url>
+              <token>${splunk-token}</token>
+              <source>${application-name}</source>
+              <host>${HOSTNAME}</host>
+              <disableCertificateValidation>true</disableCertificateValidation>
+              <layout class="ch.qos.logback.classic.PatternLayout">
+                  <!--<pattern>${CONSOLE_LOG_PATTERN}</pattern> -->
+                  <pattern>%msg</pattern>
+              </layout>
+          </appender>
+      
+          <root level="INFO">
+              <appender-ref ref="splunk"/>
+          </root>
+      
+      </configuration>
 
+- apiVersion: v1
+  kind: Route
+  labels:
+    app: ${APP_NAME}
+  metadata:
+    name: ${OCP_OBJECT_NAME}
+    annotations:
+      haproxy.router.openshift.io/disable_cookies: 'true'
+  spec:
+    port:
+      targetPort: http
+    to:
+      kind: Service
+      name: ${OCP_OBJECT_NAME}
+
+- apiVersion: v1
+  kind: Route
+  labels:
+    app: ${APP_NAME}
+  metadata:
+    name: ${OCP_OBJECT_NAME}-mgmt
+    annotations:
+      haproxy.router.openshift.io/disable_cookies: 'true'
+  spec:
+    port:
+      targetPort: mgmt
+    to:
+      kind: Service
+      name: ${OCP_OBJECT_NAME}
+    path: /actuator
+    
 - apiVersion: v1
   kind: Service
   labels:
@@ -76,20 +137,12 @@ objects:
         containers:
           - name: ${OCP_OBJECT_NAME}
             image: ${IMAGE_NAME}:${IMAGE_TAG}
-            imagePullPolicy: IfNotPresent
+            imagePullPolicy: Always
             env:
               - name: JAVA_OPTIONS
                 value: "${JAVA_OPTIONS}"
               - name: NAMESPACE
                 value: "${NAMESPACE}"
-              - name: INFO_PLATFORM_NAMESPACE
-                value: "${NAMESPACE}"
-              - name: INFO_PLATFORM_TYPE
-                value: "OpenShift"
-              - name: INFO_DEPLOYMENT_TYPE
-                value: "${DEPLOYMENT_TYPE}"
-              - name: INFO_DEPLOYMENT_TAG
-                value: "${DEPLOYMENT_TAG}"
             capabilities: {}            
             ports:
               - containerPort: 8080
@@ -126,74 +179,57 @@ objects:
             configMap:
               name: ${OCP_OBJECT_NAME}
 
-    triggers:
-    - imageChangeParams:
-        automatic: false
-        containerNames:
-        - ${OCP_OBJECT_NAME}
-        from:
-          kind: ImageStreamTag
-          name: ${IMAGE_NAME}:${IMAGE_TAG}
-      type: ImageChange
+    triggers: []
 
 parameters:
-- description: The application name.
+- name: APP_NAME
   displayName: Application Name
-  name: APP_NAME
   required: true
-- description: The application profile.
+- name: APP_VERSION
+  displayName: Application version
+  required: true
+- name: NAMESPACE
+  displayName: Namespace
+  required: true
+- name: APP_PROFILE
   displayName: Application profile
-  name: APP_PROFILE
   required: true
-- description: The application namespace.
-  displayName: Application namespace
-  name: NAMESPACE
-  required: true
-- description: The OpenShift DC name.
+- name: OCP_OBJECT_NAME
   displayName: OpenShift DC name
-  name: OCP_OBJECT_NAME
   required: true
-- description: replicas.
-  displayName: Replicas
-  name: REPLICAS
-  value: "1"
-- description: Minimum amount of memory to reserve for the container.
-  displayName: Memory Request
-  name: MEMORY_REQUEST
-  value: 300Mi
-- description: Maximum amount of memory the container can use.
-  displayName: Memory Limit
-  name: MEMORY_LIMIT
-  value: 1Gi
-- description: Minimum amount of CPU to reserve for the container.
-  displayName: CPU Request
-  name: CPU_REQUEST
-  value: 100m
-- description: Maximum amount of CPU the container can use.
-  displayName: CPU Limit
-  name: CPU_LIMIT
-  value: "1"
-- description: JVM Options.
-  displayName: JVM Options
-  name: JAVA_OPTIONS
-  value: "-XshowSettings:vm -Xms256m -Xmx900m"
-- description: Image name.
+- name: IMAGE_NAME
   displayName: Image name
-  name: IMAGE_NAME
   required: true
-- description: Image tag.
+- name: IMAGE_TAG
   displayName: Image tag
-  name: IMAGE_TAG
   required: true
-- name: DEPLOYMENT_TYPE
-  value: ""
-- name: DEPLOYMENT_TAG
-  value: ""            
-- description: Config server uri.
+- name: REPLICAS
+  displayName: Replicas  
+  value: "1"
+- name: MEMORY_REQUEST
+  displayName: Memory Request
+  description: Minimum amount of memory to reserve for the container.
+  value: 300Mi
+- name: MEMORY_LIMIT
+  displayName: Memory Limit
+  description: Maximum amount of memory the container can use.
+  value: 1Gi
+- name: CPU_REQUEST
+  displayName: CPU Request
+  description: Minimum amount of CPU to reserve for the container.
+  value: 100m
+- name: CPU_LIMIT
+  displayName: CPU Limit
+  description: Maximum amount of CPU the container can use.
+  value: "1"
+- name: JAVA_OPTIONS
+  displayName: JVM Options
+  value: "-XshowSettings:vm -Xms256m -Xmx900m"
+  
+## Config Server specific parameters
+- name: CONFIG_SERVER_URI
   displayName: Config server uri
-  name: CONFIG_SERVER_URI
   value: "http://spring-config-server:8080"
-- description: Config server label.
+- name: CONFIGS_BRANCH
   displayName: Config server label
-  name: CONFIGS_BRANCH
   required: true
