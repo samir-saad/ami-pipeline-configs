@@ -1,46 +1,45 @@
 <settings>
-	<servers>
-		<server>
-			<id>snapshots</id>
-			<username>${internal.repo.username}</username>
-			<password>${internal.repo.password}</password>
-		</server>
-		<server>
-			<id>releases</id>
-			<username>${internal.repo.username}</username>
-			<password>${internal.repo.password}</password>
-		</server>
-	</servers>
+    <servers>
+        <server>
+            <id>snapshots</id>
+            <username>${repository.deploy.username}</username>
+            <password>${repository.deploy.password}</password>
+        </server>
+        <server>
+            <id>releases</id>
+            <username>${repository.deploy.username}</username>
+            <password>${repository.deploy.password}</password>
+        </server>
+    </servers>
+    <mirrors>
+        <mirror>
+            <!--This sends everything else to /public -->
+            <id>nexus</id>
+            <mirrorOf>*</mirrorOf>
+            <url>http://nexus-cicd.cloudapps.ocp.local.net/repository/maven-all-public/</url>
+        </mirror>
+    </mirrors>
 
-	<mirrors>
-    <mirror>
-      <!--This sends everything else to /public -->
-      <id>nexus</id>
-      <mirrorOf>*</mirrorOf>
-      <url>http://nexus:8081/repository/maven-all-public/</url>
-    </mirror>
-  </mirrors>
-  
-  <profiles>
-		<profile>
-			<id>ami</id>
-			<repositories>
-				<repository>
-					<id>snapshots</id>
-					<name>SnapShots</name>
-					<url>http://nexus:8081/repository/maven-snapshots/</url>
-				</repository>
-				<repository>
-					<id>releases</id>
-					<name>Releases</name>
-					<url>http://nexus:8081/repository/maven-releases/</url>
-				</repository>
-			</repositories>
-		</profile>
-	</profiles>
+    <profiles>
+        <profile>
+            <id>ami</id>
+            <repositories>
+                <repository>
+                    <id>snapshots</id>
+                    <name>SnapShots</name>
+                    <url>http://nexus-cicd.cloudapps.ocp.local.net/repository/maven-snapshots/</url>
+                </repository>
+                <repository>
+                    <id>releases</id>
+                    <name>Releases</name>
+                    <url>http://nexus-cicd.cloudapps.ocp.local.net/repository/maven-releases/</url>
+                </repository>
+            </repositories>
+        </profile>
+    </profiles>
 
-	<activeProfiles>
-		<activeProfile>ami</activeProfile>
-	</activeProfiles>
-  
+    <activeProfiles>
+        <activeProfile>ami</activeProfile>
+    </activeProfiles>
+
 </settings>
