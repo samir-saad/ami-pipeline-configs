@@ -45,7 +45,7 @@ objects:
         kind: DockerImage
         name: "${IMAGE_NAME}:${IMAGE_TAG}"
       pushSecret:
-        name: quay-push-secret
+        name: image-push-secret
     runPolicy: Serial
     source:
       binary: {}
