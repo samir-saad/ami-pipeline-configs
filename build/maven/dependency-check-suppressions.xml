@@ -126,4 +126,28 @@
 		<cve>CVE-2019-3799</cve>
 	</suppress>
 	
+	<suppress>
+		<notes>
+			<![CDATA[
+		   file name: splunk-library-javalogging-1.6.2.jar
+		   ]]>
+		</notes>
+		<gav regex="true">^com\.splunk\.logging:splunk-library-javalogging:.*$</gav>
+		<cve>CVE-2013-7394</cve>
+		<cve>CVE-2014-2578</cve>
+		<cve>CVE-2019-5727</cve>
+		<cve>CVE-2011-4644</cve>
+		<cve>CVE-2013-6771</cve>
+		<cve>CVE-2013-6870</cve>
+		<cve>CVE-2018-7431</cve>
+		<cve>CVE-2016-4858</cve>
+		<cve>CVE-2018-7432</cve>
+		<cve>CVE-2016-4857</cve>
+		<cve>CVE-2016-4859</cve>
+		<cve>CVE-2018-11409</cve>
+		<cve>CVE-2018-7427</cve>
+		<cve>CVE-2018-7429</cve>
+		<cve>CVE-2017-5880</cve>
+	</suppress>
+	
 </suppressions>
