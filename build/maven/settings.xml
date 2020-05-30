@@ -2,26 +2,26 @@
 	<servers>
 		<server>
 			<id>snapshots</id>
-			<username>${internal.repo.username}</username>
-			<password>${internal.repo.password}</password>
+			<username>${repository.deploy.username}</username>
+			<password>${repository.deploy.password}</password>
 		</server>
 		<server>
 			<id>releases</id>
-			<username>${internal.repo.username}</username>
-			<password>${internal.repo.password}</password>
+			<username>${repository.deploy.username}</username>
+			<password>${repository.deploy.password}</password>
 		</server>
 	</servers>
 
 	<mirrors>
-    <mirror>
-      <!--This sends everything else to /public -->
-      <id>nexus</id>
-      <mirrorOf>*</mirrorOf>
-      <url>http://nexus-devops.apps.ocp3.local.net/repository/maven-public/</url>
-    </mirror>
-  </mirrors>
-  
-  <profiles>
+		<mirror>
+			<!--This sends everything else to /public -->
+			<id>nexus</id>
+			<mirrorOf>*</mirrorOf>
+			<url>http://nexus-devops.apps.ocp3.local.net/repository/maven-public/</url>
+		</mirror>
+	</mirrors>
+
+	<profiles>
 		<profile>
 			<id>ami</id>
 			<repositories>
@@ -42,5 +42,5 @@
 	<activeProfiles>
 		<activeProfile>ami</activeProfile>
 	</activeProfiles>
-  
+
 </settings>

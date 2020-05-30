@@ -22,15 +22,15 @@ objects:
     name: ${INPUT_STREAM_TAG}
 
 # Output stream
-- apiVersion: image.openshift.io/v1
-  kind: ImageStream
-  metadata:
-    labels:
-      app: ${APP_NAME}
-    name: ${APP_NAME}
-  spec:
-    lookupPolicy:
-      local: false
+#- apiVersion: image.openshift.io/v1
+#  kind: ImageStream
+#  metadata:
+#    labels:
+#      app: ${APP_NAME}
+#    name: ${APP_NAME}
+#  spec:
+#    lookupPolicy:
+#      local: false
 
 # Build config  
 - apiVersion: build.openshift.io/v1
@@ -38,12 +38,14 @@ objects:
   metadata:
     labels:
       app: ${APP_NAME}
-    name: ${BUILD_NAME}
+    name: ${BUILD_NAME}-${IMAGE_TAG}
   spec:
     output:
       to:
-        kind: ImageStreamTag
-        name: "${APP_NAME}:${APP_VERSION}"
+        kind: DockerImage
+        name: "${IMAGE_NAME}:${IMAGE_TAG}"
+      pushSecret:
+        name: image-push-secret
     runPolicy: Serial
     source:
       binary: {}
@@ -67,6 +69,12 @@ parameters:
   displayName: Namespace
 - name: BUILD_NAME
   displayName: Build Name
+  required: true
+- name: IMAGE_NAME
+  displayName: Image name
+  required: true
+- name: IMAGE_TAG
+  displayName: Image tag
   required: true
 - name: INPUT_STREAM_NAME
   displayName: Input Image stream name

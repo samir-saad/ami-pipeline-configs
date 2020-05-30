@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: Template
+labels:
+  template: horizontal-pod-autoscaler-template
+metadata:
+  annotations:
+    description: horizontal-pod-autoscaler-template
+  name: horizontal-pod-autoscaler-template
+objects:
+- apiVersion: autoscaling/v2beta1
+  kind: HorizontalPodAutoscaler
+  metadata:
+    name: ${OCP_OBJECT_NAME}-hpa-${RESOURCE_TYPE}
+  spec:
+    scaleTargetRef:
+      apiVersion: apps.openshift.io/v1
+      kind: DeploymentConfig
+      name: ${OCP_OBJECT_NAME}
+    minReplicas: ${{MIN_REPLICAS}}
+    maxReplicas: ${{MAX_REPLICAS}}
+    metrics:
+    - type: Resource
+      resource:
+        name: ${RESOURCE_TYPE}
+        targetAverageUtilization: ${{AVG_UTILIZATION}}
+        
+parameters:
+- name: OCP_OBJECT_NAME
+  displayName: OpenShift HPA name
+  required: true
+- name: MIN_REPLICAS
+  displayName: Minimum replicas
+  required: true
+- name: MAX_REPLICAS
+  displayName: Maximum replicas
+  required: true
+- name: RESOURCE_TYPE
+  displayName: Resource type  
+  required: true
+- name: AVG_UTILIZATION
+  displayName: Target average utilization
+  required: true

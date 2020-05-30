@@ -12,8 +12,9 @@
 
 		<gav regex="true">^org\.springframework\.security:spring-security.*$</gav>
 		<cve>CVE-2018-1258</cve>
+		<cve>CVE-2019-3795</cve>
 	</suppress>
-	
+
 	<suppress>
 		<notes>
 			<![CDATA[
@@ -24,7 +25,7 @@
 		<cve>CVE-2019-11269</cve>
 		<cve>CVE-2019-3778</cve>
 	</suppress>
-	
+
 	<suppress>
 		<notes>
 			<![CDATA[
@@ -47,7 +48,7 @@
 		<cve>CVE-2020-10672</cve>
 		<cve>CVE-2019-14540</cve>
 	</suppress>
-	
+
 	<suppress>
 		<notes>
 			<![CDATA[
@@ -59,5 +60,5 @@
 		<cve>CVE-2017-13098</cve>
 		<cve>CVE-2018-1000180</cve>
 	</suppress>
-	
+
 </suppressions>

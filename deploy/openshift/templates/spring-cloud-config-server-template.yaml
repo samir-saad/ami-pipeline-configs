@@ -1,11 +1,11 @@
 apiVersion: v1
 kind: Template
 labels:
-  template: ami-spring-config-server-template
+  template: spring-config-server-template
 metadata:
   annotations:
-    description: ami-spring-config-server-template
-  name: ami-spring-config-server-template
+    description: spring-config-server-template
+  name: spring-config-server-template
 objects:
 - apiVersion: v1
   kind: ConfigMap
@@ -52,12 +52,44 @@ objects:
       ##              Config Repo
       ## =========================================================
       spring.cloud.config.server.git.uri=${GIT_URI}
+      spring.cloud.config.server.git.skipSslValidation=true
       spring.cloud.config.server.git.username=${SPRING_CLOUD_CONFIG_SERVER_GIT_USERNAME}
       spring.cloud.config.server.git.password=${SPRING_CLOUD_CONFIG_SERVER_GIT_PASSWORD}
       spring.cloud.config.server.git.searchPaths=*
       
       ## Disable config health check
       health.config.enabled=false
+    
+- apiVersion: v1
+  kind: Route
+  labels:
+    app: ${APP_NAME}
+  metadata:
+    name: ${OCP_OBJECT_NAME}
+    annotations:
+      haproxy.router.openshift.io/disable_cookies: 'true'
+  spec:
+    port:
+      targetPort: http
+    to:
+      kind: Service
+      name: ${OCP_OBJECT_NAME}
+
+- apiVersion: v1
+  kind: Route
+  labels:
+    app: ${APP_NAME}
+  metadata:
+    name: ${OCP_OBJECT_NAME}-mgmt
+    annotations:
+      haproxy.router.openshift.io/disable_cookies: 'true'
+  spec:
+    port:
+      targetPort: mgmt
+    to:
+      kind: Service
+      name: ${OCP_OBJECT_NAME}
+    path: /actuator
     
 - apiVersion: v1
   kind: Service
@@ -110,7 +142,7 @@ objects:
           capabilities: {}
           name: ${OCP_OBJECT_NAME}
           image: ${IMAGE_NAME}:${IMAGE_TAG}
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
           - containerPort: 8080
             name: "http"
@@ -146,66 +178,54 @@ objects:
           configMap:
             name: ${OCP_OBJECT_NAME}
 
-    triggers:
-    - imageChangeParams:
-        automatic: false
-        containerNames:
-        - ${OCP_OBJECT_NAME}
-        from:
-          kind: ImageStreamTag
-          name: ${IMAGE_NAME}:${IMAGE_TAG}
-      type: ImageChange
+    triggers: []
 
 parameters:
-parameters:
-- description: The application name.
+- name: APP_NAME
   displayName: Application Name
-  name: APP_NAME
   required: true
-- description: The application profile.
+- name: APP_VERSION
+  displayName: Application version
+  required: true
+- name: NAMESPACE
+  displayName: Namespace
+  required: true
+- name: APP_PROFILE
   displayName: Application profile
-  name: APP_PROFILE
   required: true
-- description: The application namespace.
-  displayName: Application namespace
-  name: NAMESPACE
-  required: true
-- description: The OpenShift DC name.
+- name: OCP_OBJECT_NAME
   displayName: OpenShift DC name
-  name: OCP_OBJECT_NAME
   required: true
-- description: replicas.
-  displayName: Replicas
-  name: REPLICAS
-  value: "1"
-- description: Minimum amount of memory to reserve for the container.
-  displayName: Memory Request
-  name: MEMORY_REQUEST
-  value: 300Mi
-- description: Maximum amount of memory the container can use.
-  displayName: Memory Limit
-  name: MEMORY_LIMIT
-  value: 1Gi
-- description: Minimum amount of CPU to reserve for the container.
-  displayName: CPU Request
-  name: CPU_REQUEST
-  value: 100m
-- description: Maximum amount of CPU the container can use.
-  displayName: CPU Limit
-  name: CPU_LIMIT
-  value: "1"
-- description: JVM Options.
-  displayName: JVM Options
-  name: JAVA_OPTIONS
-  value: "-XshowSettings:vm -Xms256m -Xmx900m"
-- description: Image name.
+- name: IMAGE_NAME
   displayName: Image name
-  name: IMAGE_NAME
   required: true
-- description: Image tag.
+- name: IMAGE_TAG
   displayName: Image tag
-  name: IMAGE_TAG
   required: true
+- name: REPLICAS
+  displayName: Replicas  
+  value: "1"
+- name: MEMORY_REQUEST
+  displayName: Memory Request
+  description: Minimum amount of memory to reserve for the container.
+  value: 300Mi
+- name: MEMORY_LIMIT
+  displayName: Memory Limit
+  description: Maximum amount of memory the container can use.
+  value: 1Gi
+- name: CPU_REQUEST
+  displayName: CPU Request
+  description: Minimum amount of CPU to reserve for the container.
+  value: 100m
+- name: CPU_LIMIT
+  displayName: CPU Limit
+  description: Maximum amount of CPU the container can use.
+  value: "1"
+- name: JAVA_OPTIONS
+  displayName: JVM Options
+  value: "-XshowSettings:vm -Xms256m -Xmx900m"
+
+## Config Server specific parameters
 - name: GIT_URI
   required: true
 - name: GIT_USERNAME
