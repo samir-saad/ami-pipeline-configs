@@ -38,7 +38,7 @@ objects:
   metadata:
     labels:
       app: ${APP_NAME}
-    name: ${BUILD_NAME}-${IMAGE_TAG}
+    name: ${BUILD_NAME}
   spec:
     output:
       to:
