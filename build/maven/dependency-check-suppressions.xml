@@ -29,6 +29,16 @@
 	<suppress>
 		<notes>
 			<![CDATA[
+		   file name: spring-cloud-config-client-2.2.2.RELEASE.jar
+		   ]]>
+		</notes>
+		<gav regex="true">^org\.springframework\.cloud:spring-cloud-config-client:.*$</gav>
+		<cve>CVE-2020-5410</cve>
+	</suppress>
+
+	<suppress>
+		<notes>
+			<![CDATA[
 		   file name: jackson-mapper-asl-1.9.13.jar
 		   ]]>
 		</notes>
