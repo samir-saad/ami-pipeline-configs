@@ -32,7 +32,7 @@
 		   file name: spring-cloud-config-client-2.2.2.RELEASE.jar
 		   ]]>
 		</notes>
-		<gav regex="true">^org\.springframework\.cloud:spring-cloud-config-client:.*$</gav>
+		<gav regex="true">^org\.springframework\.cloud:spring-cloud.*:.*$</gav>
 		<cve>CVE-2020-5410</cve>
 	</suppress>
 
