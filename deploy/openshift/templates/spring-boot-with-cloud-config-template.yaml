@@ -90,6 +90,14 @@ objects:
       port: 8081
       protocol: TCP
       targetPort: 8081
+    - name: jolokia
+      port: 8778
+      protocol: TCP
+      targetPort: 8778
+    - name: jmx_exporter
+      port: 9779
+      protocol: TCP
+      targetPort: 9779
     selector:
       name: ${OCP_OBJECT_NAME}
     sessionAffinity: None
@@ -128,6 +136,12 @@ objects:
                 protocol: "TCP"
               - containerPort: 8081
                 name: "mgmt"
+                protocol: "TCP"
+              - containerPort: 8778
+                name: "jolokia"
+                protocol: "TCP"
+              - containerPort: 9779
+                name: "jmx_exporter"
                 protocol: "TCP"
             livenessProbe:
               httpGet:
