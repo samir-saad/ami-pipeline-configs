@@ -94,7 +94,7 @@ objects:
       port: 8778
       protocol: TCP
       targetPort: 8778
-    - name: jmx_exporter
+    - name: jmx-exporter
       port: 9779
       protocol: TCP
       targetPort: 9779
@@ -141,7 +141,7 @@ objects:
                 name: "jolokia"
                 protocol: "TCP"
               - containerPort: 9779
-                name: "jmx_exporter"
+                name: "jmx-exporter"
                 protocol: "TCP"
             livenessProbe:
               httpGet:
